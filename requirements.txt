@@ -1,4 +1,5 @@
 # Usage: pip install -r requirements.txt
+--extra-index-url https://download.pytorch.org/whl/cu116
 
 # Base ----------------------------------------
 matplotlib>=3.2.2
@@ -8,30 +9,34 @@ Pillow>=7.1.2
 PyYAML>=5.3.1
 requests>=2.23.0
 scipy>=1.4.1
-torch>=1.7.0,!=1.12.0
-torchvision>=0.8.1,!=0.13.0
+torch==1.12.1
+torchvision==0.13.1
 tqdm>=4.41.0
 protobuf<4.21.3
 
 # Logging -------------------------------------
 tensorboard>=2.4.1
-# wandb
 
 # Plotting ------------------------------------
 pandas>=1.1.4
 seaborn>=0.11.0
 
 # Export --------------------------------------
-# coremltools>=4.1  # CoreML export
-# onnx>=1.9.0  # ONNX export
-# onnx-simplifier>=0.3.6  # ONNX simplifier
-# scikit-learn==0.19.2  # CoreML quantization
-# tensorflow>=2.4.1  # TFLite export
+coremltools==5.2.0  # CoreML export
+onnx==1.12.0  # ONNX export
+onnxsim==0.4.8
+onnxruntime==1.12.1
+tensorflow==2.8.3
+tensorflow-addons==0.16.1
+tensorflow-io-gcs-filesystem==0.26.0
+tensorflow-probability==0.16.0
+nvidia-pyindex==1.0.9
+onnx-graphsurgeon
+git+https://github.com/onnx/onnx-tensorflow.git@v1.10.0#egg=onnx_tf
 # tensorflowjs>=3.9.0  # TF.js export
 # openvino-dev  # OpenVINO export
 
 # Extras --------------------------------------
-ipython  # interactive notebook
 psutil  # system utilization
 thop  # FLOPs computation
 # albumentations>=1.0.3
