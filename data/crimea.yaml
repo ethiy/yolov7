@@ -1,0 +1,9 @@
+train: /home/oussama/data/crimea_dataset/darknet/pruned_classes-416x416/train.txt
+val: /home/oussama/data/crimea_dataset/darknet/pruned_classes-416x416/validation.txt
+test: /home/oussama/data/crimea_dataset/darknet/pruned_classes-416x416/test.txt
+
+# number of classes
+nc: 10
+
+# class names
+names: ["CAR", "VAN", "MOTORBIKE", "PEDESTRIAN", "DUMPSTER", "WASTE", "PEDESTRIAN_HEAD", "TRUCK", "BUS", "BICYCLE"]
