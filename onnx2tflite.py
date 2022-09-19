@@ -2,7 +2,7 @@
 Convert onnx model to tflite.
 
 Usage:
-  onnx2tflite --onnx-model <onnx_model_path> --test-image <test_image_path> --class-names <class_names_path> [--representative-images <representative_images_file_path> --representative-number <representative_images_number>] [--int8 | --full-int8]
+  onnx2tflite --onnx-model <onnx_model_path> --test-image <test_image_path> --class-names <class_names_path> [--representative-images <representative_images_file_path> --representative-number <representative_images_number>] [--int8 | --full-int8 | --float16]
   onnx2tflite --version
 
 Options:
@@ -11,6 +11,7 @@ Options:
   --onnx-model <onnx_model_path>                                ONNX model path. [type: path]
   --test-image <test_image_path>                                Test image path. [type: path]
   --int8                                                        Quantize model to int8.
+  --float16                                                     Quantize model to float16.
   --full-int8                                                   Fully quantize model to int8.
   --representative-images <representative_images_file_path>     File containing paths to representative images for a full quantization. [type: path]
   --representative-number <representative_images_number>        Number of representative images for calibration [default: 100]. [type: int]
@@ -67,14 +68,16 @@ def get_onnx_input_size(onnx_model: onnx.ModelProto) -> Tuple[int, int]:
 
 
 def get_tflite_output_path(
-    onnx_model_path: Path, int8: bool, full_int8: bool, representative_data: bool
+    onnx_model_path: Path, int8: bool, full_int8: bool, float16: bool, representative_data: bool
 ) -> Path:
     quantization_mode_string = ""
     if int8 or full_int8:
-        quantization_mode_string = "_{}int8{}".format(
-            "full_" if full_int8 else "", "_data" if representative_data else ""
+        quantization_mode_string = "{}int8{}".format(
+            "full_" if full_int8 else "", "-data" if representative_data else ""
         )
-    return onnx_model_path.parent / "{}{}.tflite".format(
+    if float16:
+        quantization_mode_string = "flt16"
+    return onnx_model_path.parent / "{}-{}.tflite".format(
         onnx_model_path.stem, quantization_mode_string
     )
 
@@ -96,12 +99,13 @@ def tf2tflite(
     width: int,
     int8: bool,
     full_int8: bool,
+    float16: bool,
     representative_data: Optional[Path],
     representative_number: int,
 ) -> None:
     converter = tf.lite.TFLiteConverter.from_saved_model(tf_output_path.as_posix())
     converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS]
-    if int8 or full_int8:
+    if int8 or full_int8 or float16:
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
     if representative_data is not None:
         converter.representative_dataset = representative_dataset(
@@ -110,6 +114,8 @@ def tf2tflite(
             height=height,
             width=width,
         )
+    if float16:
+        converter.target_spec.supported_types = [tf.float16]
     if full_int8:
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
         converter.inference_input_type = tf.uint8
@@ -255,6 +261,7 @@ def main():
         onnx_model_path=arguments["--onnx-model"],
         int8=arguments["--int8"],
         full_int8=arguments["--full-int8"],
+        float16=arguments["--float16"],
         representative_data=(arguments["--representative-images"] is not None),
     )
 
@@ -265,6 +272,7 @@ def main():
         width=width,
         int8=arguments["--int8"],
         full_int8=arguments["--full-int8"],
+        float16=arguments["--float16"],
         representative_data=arguments["--representative-images"],
         representative_number=arguments["--representative-number"],
     )
