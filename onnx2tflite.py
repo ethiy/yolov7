@@ -31,7 +31,6 @@ import onnx_tf
 from type_docopt import docopt
 from google.protobuf.json_format import MessageToDict
 import numpy as np
-import numpy.typing as npt
 import cv2
 
 
@@ -48,8 +47,8 @@ def get_image_paths(image_list_filepath: Path) -> List[Path]:
 
 def representative_dataset(
     image_list_filepath: Path, representative_number: int, height: int, width: int
-) -> Callable[[None], Generator[npt.NDArray[Any], None, None]]:
-    def representative_dataset_gen() -> Generator[npt.NDArray[Any], None, None]:
+) -> Callable[[None], Generator[Any, None, None]]:
+    def representative_dataset_gen() -> Generator[Any, None, None]:
         for image_path in random.sample(
             get_image_paths(image_list_filepath=image_list_filepath),
             representative_number,
@@ -70,7 +69,7 @@ def get_onnx_input_size(onnx_model: onnx.ModelProto) -> Tuple[int, int]:
 def get_tflite_output_path(
     onnx_model_path: Path, int8: bool, full_int8: bool, float16: bool, representative_data: bool
 ) -> Path:
-    quantization_mode_string = ""
+    quantization_mode_string = "flt32"
     if int8 or full_int8:
         quantization_mode_string = "{}int8{}".format(
             "full_" if full_int8 else "", "-data" if representative_data else ""
@@ -193,7 +192,7 @@ def visualize_bounding_boxes(
 
 def load_image(
     image_path: Path, height: int, width: int, int8: bool = False
-) -> npt.NDArray[Any]:
+) -> Any:
     image = (
         np.array(
             [
